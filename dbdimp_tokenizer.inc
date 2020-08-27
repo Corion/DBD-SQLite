@@ -1,10 +1,10 @@
-typedef struct perl_tokenizer {
+typedef struct perl_fts3_tokenizer {
     sqlite3_tokenizer base;
     SV *coderef;                 /* the perl tokenizer is a coderef that takes
                                     a string and returns a cursor coderef */
-} perl_tokenizer;
+} perl_fts3_tokenizer;
 
-typedef struct perl_tokenizer_cursor {
+typedef struct perl_fts3_tokenizer_cursor {
     sqlite3_tokenizer_cursor base;
     SV *coderef;                 /* ref to the closure that returns terms */
     char *pToken;                /* storage for a copy of the last token */
@@ -14,7 +14,7 @@ typedef struct perl_tokenizer_cursor {
     const char *pInput;          /* input we are tokenizing */
     const char *lastByteOffset;  /* offset into pInput */
     int lastCharOffset;          /* char offset corresponding to lastByteOffset */
-} perl_tokenizer_cursor;
+} perl_fts3_tokenizer_cursor;
 
 /*
 ** Create a new tokenizer instance.
@@ -22,7 +22,7 @@ typedef struct perl_tokenizer_cursor {
 **   CREATE .. USING fts3( ... , tokenize=perl qualified::function::name)
 ** where qualified::function::name is a fully qualified perl function
 */
-static int perl_tokenizer_Create(
+static int perl_fts3_tokenizer_Create(
     int argc, const char * const *argv,
     sqlite3_tokenizer **ppTokenizer
 ){
@@ -30,13 +30,13 @@ static int perl_tokenizer_Create(
     dSP;
     int n_retval;
     SV *retval;
-    perl_tokenizer *t;
+    perl_fts3_tokenizer *t;
 
     if (!argc) {
         return SQLITE_ERROR;
     }
 
-    t = (perl_tokenizer *) sqlite3_malloc(sizeof(*t));
+    t = (perl_fts3_tokenizer *) sqlite3_malloc(sizeof(*t));
     if( t==NULL ) return SQLITE_NOMEM;
     memset(t, 0, sizeof(*t));
 
@@ -67,9 +67,9 @@ static int perl_tokenizer_Create(
 /*
 ** Destroy a tokenizer
 */
-static int perl_tokenizer_Destroy(sqlite3_tokenizer *pTokenizer){
+static int perl_fts3_tokenizer_Destroy(sqlite3_tokenizer *pTokenizer){
     dTHX;
-    perl_tokenizer *t = (perl_tokenizer *) pTokenizer;
+    perl_fts3_tokenizer *t = (perl_fts3_tokenizer *) pTokenizer;
     sv_free(t->coderef);
     sqlite3_free(t);
     return SQLITE_OK;
@@ -82,7 +82,7 @@ static int perl_tokenizer_Destroy(sqlite3_tokenizer *pTokenizer){
 ** This is passed to the tokenizer instance, which then returns a
 ** closure implementing the cursor (so the cursor is again a coderef).
 */
-static int perl_tokenizer_Open(
+static int perl_fts3_tokenizer_Open(
     sqlite3_tokenizer *pTokenizer,       /* Tokenizer object */
     const char *pInput, int nBytes,      /* Input buffer */
     sqlite3_tokenizer_cursor **ppCursor  /* OUT: Created tokenizer cursor */
@@ -94,11 +94,11 @@ static int perl_tokenizer_Open(
     SV *perl_string;
     int n_retval;
 
-    perl_tokenizer *t = (perl_tokenizer *)pTokenizer;
+    perl_fts3_tokenizer *t = (perl_fts3_tokenizer *)pTokenizer;
 
     /* allocate and initialize the cursor struct */
-    perl_tokenizer_cursor *c;
-    c = (perl_tokenizer_cursor *) sqlite3_malloc(sizeof(*c));
+    perl_fts3_tokenizer_cursor *c;
+    c = (perl_fts3_tokenizer_cursor *) sqlite3_malloc(sizeof(*c));
     memset(c, 0, sizeof(*c));
     *ppCursor = &c->base;
 
@@ -146,10 +146,10 @@ static int perl_tokenizer_Open(
 
 /*
 ** Close a tokenization cursor previously opened by a call to
-** perl_tokenizer_Open() above.
+** perl_fts3_tokenizer_Open() above.
 */
-static int perl_tokenizer_Close(sqlite3_tokenizer_cursor *pCursor){
-    perl_tokenizer_cursor *c = (perl_tokenizer_cursor *) pCursor;
+static int perl_fts3_tokenizer_Close(sqlite3_tokenizer_cursor *pCursor){
+    perl_fts3_tokenizer_cursor *c = (perl_fts3_tokenizer_cursor *) pCursor;
 
     dTHX;
     sv_free(c->coderef);
@@ -160,17 +160,17 @@ static int perl_tokenizer_Close(sqlite3_tokenizer_cursor *pCursor){
 
 /*
 ** Extract the next token from a tokenization cursor.  The cursor must
-** have been opened by a prior call to perl_tokenizer_Open().
+** have been opened by a prior call to perl_fts3_tokenizer_Open().
 */
-static int perl_tokenizer_Next(
-    sqlite3_tokenizer_cursor *pCursor,  /* Cursor returned by perl_tokenizer_Open */
+static int perl_fts3_tokenizer_Next(
+    sqlite3_tokenizer_cursor *pCursor,  /* Cursor returned by perl_fts3_tokenizer_Open */
     const char **ppToken,               /* OUT: *ppToken is the token text */
     int *pnBytes,                       /* OUT: Number of bytes in token */
     int *piStartOffset,                 /* OUT: Starting offset of token */
     int *piEndOffset,                   /* OUT: Ending offset of token */
     int *piPosition                     /* OUT: Position integer of token */
 ){
-    perl_tokenizer_cursor *c = (perl_tokenizer_cursor *) pCursor;
+    perl_fts3_tokenizer_cursor *c = (perl_fts3_tokenizer_cursor *) pCursor;
     int result;
     int n_retval;
     char *token;
@@ -250,13 +250,13 @@ static int perl_tokenizer_Next(
 /*
 ** The set of routines that implement the perl tokenizer
 */
-sqlite3_tokenizer_module perl_tokenizer_Module = {
+sqlite3_tokenizer_module perl_fts3_tokenizer_Module = {
     0,
-    perl_tokenizer_Create,
-    perl_tokenizer_Destroy,
-    perl_tokenizer_Open,
-    perl_tokenizer_Close,
-    perl_tokenizer_Next
+    perl_fts3_tokenizer_Create,
+    perl_fts3_tokenizer_Destroy,
+    perl_fts3_tokenizer_Open,
+    perl_fts3_tokenizer_Close,
+    perl_fts3_tokenizer_Next
 };
 
 /*
@@ -269,7 +269,7 @@ int sqlite_db_register_fts3_perl_tokenizer(pTHX_ SV *dbh)
     int rc;
     sqlite3_stmt *pStmt;
     const char zSql[] = "SELECT fts3_tokenizer(?, ?)";
-    sqlite3_tokenizer_module *p = &perl_tokenizer_Module;
+    sqlite3_tokenizer_module *p = &perl_fts3_tokenizer_Module;
 
     if (!DBIc_ACTIVE(imp_dbh)) {
         sqlite_error(dbh, -2, "attempt to register fts3 tokenizer on inactive database handle");
