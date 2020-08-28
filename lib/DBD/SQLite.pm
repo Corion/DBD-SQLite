@@ -550,7 +550,7 @@ my @FOREIGN_KEY_INFO_ODBC = (
 # Maybe we could add an option so that the user can choose which field
 # names will be returned; the DBI spec is not very clear about ODBC vs. CLI.
 my @FOREIGN_KEY_INFO_SQL_CLI = qw(
-  UK_TABLE_CAT 
+  UK_TABLE_CAT
   UK_TABLE_SCHEM
   UK_TABLE_NAME
   UK_COLUMN_NAME
@@ -764,7 +764,7 @@ sub statistics_info {
                             TABLE_CAT   => undef,
                             TABLE_SCHEM => $db->{name},
                             TABLE_NAME  => $tbname,
-                            NON_UNIQUE    => $row->{unique} ? 0 : 1, 
+                            NON_UNIQUE    => $row->{unique} ? 0 : 1,
                             INDEX_QUALIFIER => undef,
                             INDEX_NAME      => $row->{name},
                             TYPE            => 'btree', # see https://www.sqlite.org/version3.html esp. "Traditional B-trees are still used for indices"
@@ -1333,7 +1333,7 @@ bind values with no explicit type.
 
 SQLite supports several placeholder expressions, including C<?>
 and C<:AAAA>. Consult the L<DBI> and SQLite documentation for
-details. 
+details.
 
 L<https://www.sqlite.org/lang_expr.html#varparam>
 
@@ -1344,7 +1344,7 @@ named) placeholders to avoid confusion.
   my $sth = $dbh->prepare(
     'update TABLE set a=?1 where b=?2 and a IS NOT ?1'
   );
-  $sth->execute(1, 2); 
+  $sth->execute(1, 2);
 
 =head2 Pragma
 
@@ -1519,7 +1519,7 @@ As the L<DBI> doc says, you almost certainly do B<not> need to
 call L<DBI/finish> method if you fetch all rows (probably in a loop).
 However, there are several exceptions to this rule, and rolling-back
 of an unfinished C<SELECT> statement is one of such exceptional
-cases. 
+cases.
 
 SQLite prohibits C<ROLLBACK> of unfinished C<SELECT> statements in
 a transaction (See L<http://sqlite.org/lang_transaction.html> for
@@ -1549,7 +1549,7 @@ statements (a C<dump>) to a statement handle (via C<prepare> or C<do>),
 L<DBD::SQLite> only processes the first statement, and discards the
 rest.
 
-If you need to process multiple statements at a time, set 
+If you need to process multiple statements at a time, set
 a C<sqlite_allow_multiple_statements> attribute of a database handle
 to true when you connect to a database, and C<do> method takes care
 of the rest (since 1.30_01, and without creating DBI's statement
@@ -1742,7 +1742,7 @@ keys of temporary tables).
                                 undef, $fk_schema, $fk_table);
 
 Returns information about foreign key constraints, as specified in
-L<DBI/foreign_key_info>, but with some limitations : 
+L<DBI/foreign_key_info>, but with some limitations :
 
 =over
 
@@ -1807,7 +1807,7 @@ a C<PRAGMA> command; see L</"Foreign keys"> earlier in this manual.
                                 $unique_only, $quick);
 
 Returns information about a table and it's indexes, as specified in
-L<DBI/statistics_info>, but with some limitations : 
+L<DBI/statistics_info>, but with some limitations :
 
 =over
 
@@ -2367,7 +2367,7 @@ Virtual tables are explained in L<DBD::SQLite::VirtualTable>.
 Sets a new run-time limit for the category, and returns the current limit.
 If the new value is a negative number (or omitted), the limit is unchanged
 and just returns the current limit. Category ids (SQLITE_LIMIT_LENGTH,
-SQLITE_LIMIT_VARIABLE_NUMBER, etc) can be imported from DBD::SQLite::Constants. 
+SQLITE_LIMIT_VARIABLE_NUMBER, etc) can be imported from DBD::SQLite::Constants.
 
 =head2 $dbh->sqlite_get_autocommit()
 
@@ -2640,7 +2640,7 @@ then query which buildings overlap or are contained within a specified region:
                         $minLong, $maxLong, $minLat, $maxLat);
   
   my $overlapping = $dbh->selectcol_arrayref($overlap_sql,undef,
-                        $minLong, $maxLong, $minLat, $maxLat);  
+                        $minLong, $maxLong, $minLat, $maxLat);
 
 For more detail, please see the SQLite R-Tree page
 (L<https://www.sqlite.org/rtree.html>). Note that custom R-Tree
@@ -2660,7 +2660,7 @@ virtual tables. These can have many interesting uses
 for joining regular DBMS data with some other kind of data within your
 Perl programs. Bundled with the present distribution are :
 
-=over 
+=over
 
 =item *
 
