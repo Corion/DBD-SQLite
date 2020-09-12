@@ -18,6 +18,7 @@ my %shorter_tags = (
 );
 
 my %constants = extract_constants();
+
 write_inc(%constants);
 write_pm(%constants);
 
@@ -72,9 +73,18 @@ _const_$tag()
 END
 
   for my $name (@$list) {
-    my $prefix = $tag =~ /^_/ ? "" : "SQLITE_";
+    my $prefix;
+    my $prefix2 = "SQLITE_";
+    if( $tag =~ /^_/ ) {
+      $prefix = "";
+    } elsif( $tag =~ /^fts5_/ ) {
+      $prefix = "";
+      $prefix2 = "";
+    } else {
+      $prefix = "SQLITE_";
+    };
     print $fh <<"END";
-        $prefix$name = SQLITE_$name
+        $prefix$name = $prefix2$name
 END
   }
 
@@ -97,7 +107,16 @@ END
 
     my $ix = 1;
     for my $name (@{$constants{$tag}}) {
-      my $prefix = $tag =~ /^_/ ? "" : "SQLITE_";
+      my $prefix;
+      my $prefix2 = "SQLITE_";
+      if( $tag =~ /^_/ ) {
+        $prefix = "";
+      } elsif( $tag =~ /^fts5_/ ) {
+        $prefix = "";
+        $prefix2 = "";
+      } else {
+        $prefix = "SQLITE_";
+      };
       print $fh <<"END";
         $prefix$name = $ix
 END
@@ -148,7 +167,7 @@ END
     print $fh <<"END";
     # $tag
     qw/
-@{[join "\n", map {"      SQLITE_$_"} sort @{$constants{$tag}}]}
+@{[join "\n", map {/^FTS5_/ ? "      $_" : "      SQLITE_$_"} sort @{$constants{$tag}}]}
     /,
 
 END
@@ -175,7 +194,7 @@ END
   for my $tag (sort keys %constants) {
     print $fh <<"END";
     $tag => [qw/
-@{[join "\n", map {"      SQLITE_$_"} sort @{$constants{$tag}}]}
+@{[join "\n", map {/^FTS5_/ ? "      $_" : "      SQLITE_$_"} sort @{$constants{$tag}}]}
     /],
 
 END
