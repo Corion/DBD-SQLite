@@ -488,7 +488,6 @@ static int perl_fts5_tokenizer_Tokenize(
     PUTBACK;
     call_sv(c->coderef, G_VOID);
 
-    printf("Returned from tokenization CB, returning to SQLite\n");
     SPAGAIN;
 
     PUTBACK;
@@ -505,8 +504,8 @@ int perl_fts5_xToken(pTHX_
         int iStart,         /* Byte offset of token within input text */
         int iEnd            /* Byte offset of end of token within input text */
 ) {
-    const char* chrToken = SvPV_nolen(svToken);
-    STRLEN nToken = strlen(chrToken);
+    STRLEN nToken;
+    const char* chrToken = SvPV(svToken, nToken);
     perl_cb_ctx * p = (perl_cb_ctx *)SvPV_nolen( pCtx );
     return p->xToken(p->Ctx,tflags,chrToken,nToken,iStart,iEnd);
 }
